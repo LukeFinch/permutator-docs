@@ -25,16 +25,15 @@
 
 <style>
 /* Coral Pixels, Source Serif 4 and IBM Plex Mono: SIL Open Font License 1.1.
-   "optional" never swaps after first paint, so nothing reflows. */
-@font-face { font-family: "Coral Pixels"; src: url("fonts/coral-pixels-latin.woff2") format("woff2"); font-display: optional; }
+   "optional" never swaps after first paint, so nothing reflows. Coral Pixels uses "block" instead: with
+   "optional" a slow first load leaves the display type in the Times New Roman fallback for the whole visit. */
+@font-face { font-family: "Coral Pixels"; src: url("fonts/coral-pixels-latin.woff2") format("woff2"); font-display: block; }
 @font-face { font-family: "Source Serif 4"; src: url("fonts/source-serif-4-latin-var.woff2") format("woff2"); font-weight: 200 900; font-style: normal; font-display: optional; }
 @font-face { font-family: "Source Serif 4"; src: url("fonts/source-serif-4-italic-latin-var.woff2") format("woff2"); font-weight: 200 900; font-style: italic; font-display: optional; }
 @font-face { font-family: "IBM Plex Mono"; src: url("fonts/ibm-plex-mono-400-latin.woff2") format("woff2"); font-weight: 400; font-display: optional; }
 
-/* Coral Pixels is a colour font that fakes sub-pixel fringing in orange and blue. Its 32 palette entries are
-   thresholded to ink: entries at 50% alpha or more become solid ink, the faint fringe ones disappear. */
-@font-palette-values --ink-light { font-family: "Coral Pixels"; override-colors: 0 rgba(17, 17, 17, 0), 1 rgba(17, 17, 17, 0), 2 rgba(17, 17, 17, 0), 3 rgba(17, 17, 17, 0), 4 rgba(17, 17, 17, 0), 5 rgba(17, 17, 17, 1), 6 rgba(17, 17, 17, 1), 7 rgba(17, 17, 17, 1), 8 rgba(17, 17, 17, 0), 9 rgba(17, 17, 17, 1), 10 rgba(17, 17, 17, 0), 11 rgba(17, 17, 17, 1), 12 rgba(17, 17, 17, 1), 13 rgba(17, 17, 17, 1), 14 rgba(17, 17, 17, 0), 15 rgba(17, 17, 17, 0), 16 rgba(17, 17, 17, 1), 17 rgba(17, 17, 17, 0), 18 rgba(17, 17, 17, 1), 19 rgba(17, 17, 17, 0), 20 rgba(17, 17, 17, 0), 21 rgba(17, 17, 17, 0), 22 rgba(17, 17, 17, 0), 23 rgba(17, 17, 17, 1), 24 rgba(17, 17, 17, 1), 25 rgba(17, 17, 17, 1), 26 rgba(17, 17, 17, 0), 27 rgba(17, 17, 17, 1), 28 rgba(17, 17, 17, 1), 29 rgba(17, 17, 17, 1), 30 rgba(17, 17, 17, 1), 31 rgba(17, 17, 17, 1); }
-@font-palette-values --ink-dark { font-family: "Coral Pixels"; override-colors: 0 rgba(240, 240, 236, 0), 1 rgba(240, 240, 236, 0), 2 rgba(240, 240, 236, 0), 3 rgba(240, 240, 236, 0), 4 rgba(240, 240, 236, 0), 5 rgba(240, 240, 236, 1), 6 rgba(240, 240, 236, 1), 7 rgba(240, 240, 236, 1), 8 rgba(240, 240, 236, 0), 9 rgba(240, 240, 236, 1), 10 rgba(240, 240, 236, 0), 11 rgba(240, 240, 236, 1), 12 rgba(240, 240, 236, 1), 13 rgba(240, 240, 236, 1), 14 rgba(240, 240, 236, 0), 15 rgba(240, 240, 236, 0), 16 rgba(240, 240, 236, 1), 17 rgba(240, 240, 236, 0), 18 rgba(240, 240, 236, 1), 19 rgba(240, 240, 236, 0), 20 rgba(240, 240, 236, 0), 21 rgba(240, 240, 236, 0), 22 rgba(240, 240, 236, 0), 23 rgba(240, 240, 236, 1), 24 rgba(240, 240, 236, 1), 25 rgba(240, 240, 236, 1), 26 rgba(240, 240, 236, 0), 27 rgba(240, 240, 236, 1), 28 rgba(240, 240, 236, 1), 29 rgba(240, 240, 236, 1), 30 rgba(240, 240, 236, 1), 31 rgba(240, 240, 236, 1); }
+/* Coral Pixels is a colour font that fakes sub-pixel fringing in orange and blue. It renders in its own colours
+   and is sharpened with a contrast filter (see .display) rather than being recoloured. */
 
 /* Sheets, after the diagram that travels with a LeWitt wall drawing: a ruled frame, a spaced title band,
    a lot of white space, and a caption band that says plainly what the sheet is. Ink on paper, nothing else. */
@@ -74,8 +73,7 @@ p { margin: 0; }
 code, .mono { font-family: var(--mono); font-size: 0.8em; }
 a { color: inherit; text-underline-offset: 3px; text-decoration-thickness: 1px; }
 :focus-visible { outline: 1px solid var(--ink); outline-offset: 4px; }
-.display { font-family: var(--display); font-palette: --ink-light; }
-@media (prefers-color-scheme: dark) { .display { font-palette: --ink-dark; } }
+.display { font-family: var(--display); filter: contrast(1.8) grayscale(1);  }
 
 /* ---------- Header ---------- */
 .site-header { position: sticky; top: 0; z-index: 10; background: var(--paper); border-bottom: 1px solid var(--ink); padding-top: env(safe-area-inset-top, 0px); }
@@ -166,8 +164,7 @@ a { color: inherit; text-underline-offset: 3px; text-decoration-thickness: 1px; 
 .steps li:first-child { padding-left: 0; }
 .steps li:last-child { padding-right: 0; }
 .steps li + li { border-left: 1px solid var(--ink); }
-.steps li::before { content: counter(step); display: block; font-family: var(--display); font-palette: --ink-light; font-size: 3rem; line-height: 1; }
-@media (prefers-color-scheme: dark) { .steps li::before { font-palette: --ink-dark; } }
+.steps li::before { content: counter(step); display: block; font-family: var(--display); filter: contrast(1.8); font-size: 3rem; line-height: 1; }
 .steps b { display: block; margin-top: calc(var(--u) * 1.5); font-weight: 600; }
 .steps span { display: block; margin-top: 4px; font-size: 1rem; }
 
