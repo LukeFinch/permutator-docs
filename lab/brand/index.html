@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brand lab · Permutator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Martian+Mono:wdth,wght@75..112.5,300..700&display=swap">
+<style>
+:root { --paper: #f6f6f3; --ink: #121212; --line: #12121222; --muted: #12121299; }
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 13px/1.45 "Martian Mono", ui-monospace, monospace; display: grid; grid-template-columns: minmax(0, 1fr) 320px; }
+main { display: grid; grid-template-rows: auto minmax(0, 1fr) auto auto; min-width: 0; padding: 20px 28px; gap: 14px; }
+header { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; }
+header h1 { font: 800 22px/1 Archivo, sans-serif; font-variation-settings: 'wdth' 125; margin: 0; letter-spacing: -0.01em; }
+.modes { display: flex; gap: 0; border: 1.5px solid var(--ink); }
+.modes button { font: inherit; background: none; border: 0; padding: 6px 12px; cursor: pointer; color: var(--ink); }
+.modes button + button { border-left: 1.5px solid var(--ink); }
+.modes button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+.seed { margin-left: auto; color: var(--muted); }
+.seed b { color: var(--ink); font-weight: 600; }
+#stage { min-height: 0; display: grid; place-items: center; cursor: crosshair; border: 1.5px solid var(--line); background: var(--pm-paper, var(--paper)); padding: 24px; user-select: none; }
+#stage svg { width: 100%; height: 100%; max-height: 100%; display: block; }
+#caption { font-size: 12px; color: var(--muted); min-height: 1.5em; }
+.rail { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; min-height: 84px; }
+.rail button { flex: 0 0 auto; width: 150px; height: 80px; padding: 6px; border: 1.5px solid var(--line); background: var(--paper); cursor: pointer; display: grid; place-items: center; }
+.rail button:hover { border-color: var(--ink); }
+.rail button svg { width: 100%; height: 100%; }
+.rail .empty { color: var(--muted); align-self: center; }
+aside { border-left: 1.5px solid var(--ink); overflow-y: auto; padding: 16px 18px 32px; display: grid; gap: 18px; align-content: start; }
+fieldset { border: 0; margin: 0; padding: 0; display: grid; gap: 10px; }
+fieldset[disabled] { opacity: 0.35; }
+legend { font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; font-size: 11px; padding: 0 0 8px; border-bottom: 1.5px solid var(--ink); width: 100%; margin-bottom: 4px; }
+.row { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; align-items: center; }
+.row label { font-size: 12px; }
+.row output { font-variant-numeric: tabular-nums; font-size: 12px; color: var(--muted); }
+.row input[type=range], .row select, .row input[type=text], .row input[type=color] { grid-column: 1 / -1; width: 100%; accent-color: var(--ink); font: inherit; }
+.row select, .row input[type=text] { border: 1.5px solid var(--line); background: var(--paper); padding: 4px 6px; }
+.row.check { grid-template-columns: auto 1fr; }
+.actions { display: grid; gap: 8px; position: sticky; top: -16px; background: var(--paper); padding: 4px 0 10px; margin-top: -4px; z-index: 1; }
+.actions button { font: 600 13px "Martian Mono", monospace; padding: 10px; border: 1.5px solid var(--ink); background: var(--ink); color: var(--paper); cursor: pointer; }
+.actions button.secondary { background: none; color: var(--ink); }
+.actions button:active { transform: translateY(1px); }
+#status { font-size: 11px; color: var(--muted); min-height: 1.4em; word-break: break-all; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Permutator brand lab</h1>
+    <div class="modes" id="modes" role="group" aria-label="Mode"></div>
+    <span class="seed">seed <b id="seedOut"></b></span>
+  </header>
+  <div id="stage" title="Click for a new seed"></div>
+  <p id="caption"></p>
+  <div class="rail" id="rail"><span class="empty">Saved configs appear here.</span></div>
+</main>
+<aside>
+  <div class="actions">
+    <button type="button" id="save">Save config</button>
+    <button type="button" class="secondary" id="reroll">New seed (or click canvas)</button>
+    <div id="status"></div>
+  </div>
+  <div id="panel"></div>
+</aside>
+
+<script type="module">
+import { render, DEFAULTS } from '/site/brand/render.js';
+
+// Every taste decision is a knob. `when` dims rows that don't apply to the current mode (rows stay rendered).
+const SCHEMA = [
+  { legend: 'Grid', rows: [
+    { key: 'cols', type: 'range', min: 2, max: 14, step: 1 },
+    { key: 'rows', type: 'range', min: 1, max: 8, step: 1 },
+    { key: 'gap', type: 'range', min: 0, max: 60, step: 1 },
+    { key: 'stroke', label: 'pen width', type: 'range', min: 0.75, max: 9, step: 0.25 },
+  ]},
+  { legend: 'Cubes', when: 'cubes', rows: [
+    { key: 'minEdges', label: 'fewest edges', type: 'range', min: 1, max: 12, step: 1 },
+    { key: 'maxEdges', label: 'most edges', type: 'range', min: 1, max: 12, step: 1 },
+    { key: 'stride', label: 'step through forms', type: 'range', min: 1, max: 97, step: 1 },
+    { key: 'connected', label: 'edges must connect', type: 'check' },
+  ]},
+  { legend: 'Arcs', when: 'arcs', rows: [
+    { key: 'arcMax', label: 'max rings', type: 'range', min: 1, max: 8, step: 1 },
+  ]},
+  { legend: 'Bars', when: 'bars', rows: [
+    { key: 'angleMin', label: 'first angle', type: 'range', min: 0, max: 180, step: 7.5 },
+    { key: 'angleMax', label: 'last angle', type: 'range', min: 0, max: 180, step: 7.5 },
+    { key: 'countMin', label: 'lines in row 1', type: 'range', min: 1, max: 12, step: 1 },
+    { key: 'countStep', label: 'lines added per row', type: 'range', min: 0, max: 6, step: 1 },
+  ]},
+  { legend: 'Type', when: 'type', rows: [
+    { key: 'text', label: 'glyphs', type: 'text' },
+    { key: 'fontSize', label: 'size', type: 'range', min: 20, max: 96, step: 1 },
+    { key: 'wdthMin', label: 'narrowest width', type: 'range', min: 62, max: 125, step: 1 },
+    { key: 'wdthMax', label: 'widest width', type: 'range', min: 62, max: 125, step: 1 },
+    { key: 'wghtMin', label: 'lightest weight', type: 'range', min: 100, max: 900, step: 10 },
+    { key: 'wghtMax', label: 'heaviest weight', type: 'range', min: 100, max: 900, step: 10 },
+  ]},
+  { legend: 'Disorder', rows: [
+    { key: 'disorder', label: 'share of cells', type: 'range', min: 0, max: 0.4, step: 0.01, fmt: v => Math.round(v * 100) + '%' },
+    { key: 'disorderKind', label: 'kind', type: 'select', options: ['rotate', 'drift', 'drop'] },
+    { key: 'disorderAmount', label: 'amount', type: 'range', min: 0.05, max: 1, step: 0.05 },
+  ]},
+  { legend: 'Signal colour', rows: [
+    { key: 'signalRule', label: 'which cells', type: 'select', options: ['diagonal', 'row', 'column', 'scatter', 'none'] },
+    { key: 'signalIndex', label: 'offset', type: 'range', min: 0, max: 13, step: 1 },
+    { key: 'signalCount', label: 'scatter count', type: 'range', min: 1, max: 20, step: 1 },
+    { key: 'signalHue', label: 'hue', type: 'range', min: 0, max: 360, step: 1 },
+    { key: 'signalChroma', label: 'chroma', type: 'range', min: 0.04, max: 0.26, step: 0.01 },
+    { key: 'signalLightness', label: 'lightness', type: 'range', min: 0.4, max: 0.85, step: 0.01 },
+  ]},
+  { legend: 'Paper & ink', rows: [
+    { key: 'paper', type: 'color' },
+    { key: 'ink', type: 'color' },
+  ]},
+];
+
+let config = { ...DEFAULTS };
+const $ = id => document.getElementById(id);
+const stage = $('stage'), panel = $('panel');
+const fieldsets = [];
+const outputs = {};
+const inputs = {};
+
+function buildPanel() {
+  SCHEMA.forEach(group => {
+    const fs = document.createElement('fieldset');
+    fs.innerHTML = `<legend>${group.legend}</legend>`;
+    group.rows.forEach(row => {
+      const div = document.createElement('div');
+      div.className = 'row' + (row.type === 'check' ? ' check' : '');
+      const id = 'k-' + row.key;
+      const label = `<label for="${id}">${row.label || row.key}</label>`;
+      let control;
+      if (row.type === 'range') control = `<input type="range" id="${id}" min="${row.min}" max="${row.max}" step="${row.step}">`;
+      if (row.type === 'select') control = `<select id="${id}">${row.options.map(o => `<option>${o}</option>`).join('')}</select>`;
+      if (row.type === 'text') control = `<input type="text" id="${id}" maxlength="12">`;
+      if (row.type === 'color') control = `<input type="color" id="${id}">`;
+      if (row.type === 'check') control = `<input type="checkbox" id="${id}">`;
+      div.innerHTML = row.type === 'check' ? control + label : label + `<output></output>` + control;
+      fs.appendChild(div);
+      const input = div.querySelector('input,select');
+      inputs[row.key] = { input, row };
+      outputs[row.key] = div.querySelector('output');
+      input.addEventListener('input', () => {
+        let v = row.type === 'range' ? Number(input.value) : row.type === 'check' ? input.checked : input.value;
+        config = { ...config, [row.key]: v };
+        update();
+      });
+    });
+    panel.appendChild(fs);
+    fieldsets.push({ fs, when: group.when });
+  });
+  ['cubes', 'arcs', 'bars', 'type'].forEach(m => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.textContent = m; b.dataset.mode = m;
+    b.addEventListener('click', () => { config = { ...config, mode: m }; update(); });
+    $('modes').appendChild(b);
+  });
+}
+
+function syncPanel() {
+  Object.entries(inputs).forEach(([key, { input, row }]) => {
+    const v = config[key];
+    if (row.type === 'check') input.checked = !!v; else if (document.activeElement !== input) input.value = v;
+    if (outputs[key]) outputs[key].textContent = row.fmt ? row.fmt(v) : (typeof v === 'number' ? (+v.toFixed(2)).toString() : '');
+  });
+  fieldsets.forEach(({ fs, when }) => { fs.disabled = when ? when !== config.mode : false; });
+  document.querySelectorAll('#modes button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.mode === config.mode)));
+}
+
+function update() {
+  const { svg, caption } = render(config, { uid: 'stage' });
+  stage.innerHTML = svg;
+  stage.style.setProperty('--pm-paper', config.paper);
+  $('caption').textContent = caption;
+  $('seedOut').textContent = config.seed;
+  syncPanel();
+}
+
+function reroll() { config = { ...config, seed: Math.floor(Math.random() * 2 ** 31) }; update(); }
+stage.addEventListener('click', reroll);
+$('reroll').addEventListener('click', reroll);
+
+$('save').addEventListener('click', async () => {
+  const json = JSON.stringify(config, null, 2);
+  let msg = '';
+  try { await navigator.clipboard.writeText(json); msg = 'Copied to clipboard. '; } catch { /* clipboard may be refused; file save still runs */ }
+  try {
+    const r = await fetch('/__save', { method: 'POST', headers: { 'content-type': 'application/json' }, body: json });
+    const out = await r.json();
+    msg += `Saved ${out.saved} → ${out.shipped}`;
+  } catch (e) { msg += 'File save failed: ' + e.message; }
+  $('status').textContent = msg;
+  loadRail();
+});
+
+async function loadRail() {
+  const rail = $('rail');
+  try {
+    const list = await (await fetch('/__saved')).json();
+    if (!list.length) return;
+    rail.innerHTML = '';
+    list.forEach(({ file, config: saved }, n) => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.title = file;
+      b.style.background = saved.paper;
+      b.innerHTML = render(saved, { uid: 'rail' + n }).svg;
+      b.addEventListener('click', () => { config = { ...DEFAULTS, ...saved }; update(); $('status').textContent = 'Loaded ' + file; });
+      rail.appendChild(b);
+    });
+  } catch { /* rail is optional */ }
+}
+
+buildPanel();
+document.fonts.ready.then(update);
+update();
+loadRail();
+</script>
+</body>
+</html>
