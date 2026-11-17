@@ -8,6 +8,7 @@ The plugin's source is kept private; this repo holds only the website and its br
 
 - `site/` is the static site that GitHub Pages serves. Pushing a change under it to `main` deploys it (`.github/workflows/pages.yml`).
 - `site/brand/render.js` draws the brand artwork. `render(config)` is a pure function of its config, seed included.
+- `site/demos.js` and `site/demos.css` draw the looping animation in each tool card. Each demo is a pure function of time; add one by writing a `D['name']` entry and a matching `<div class="demo" data-demo="name">`.
 - `lab/` is a dev-only generator for that artwork. It is not deployed.
 - `scripts/build-og.mjs` renders the social card, `site/og.png`.
 

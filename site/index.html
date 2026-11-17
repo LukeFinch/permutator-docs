@@ -23,6 +23,7 @@
 <link rel="preload" href="fonts/redaction-35-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/source-serif-4-latin-var.woff2" as="font" type="font/woff2" crossorigin>
 
+<link rel="stylesheet" href="demos.css">
 <style>
 /* Redaction 35, Source Serif 4 and IBM Plex Mono: SIL Open Font License 1.1 (Redaction's in fonts/REDACTION-OFL.txt).
    "optional" never swaps after first paint, so nothing reflows. Redaction uses "block" instead: with
@@ -321,18 +322,21 @@ footer { margin-top: calc(var(--u) * 8); padding-block: calc(var(--u) * 3) calc(
     <div class="list">
       <article class="tool">
         <h3>Keyword Groups</h3>
+        <div class="demo" data-demo="keyword-groups" aria-hidden="true"></div>
         <p>Split variable names into segments and sort them into groups by meaning: hues, ramp steps, roles, states. Saved groups power the keyword-based tools across the plugin.</p>
         <p class="benefit"><b>Why it helps.</b>One shared definition of your naming scheme, so every generator speaks the same language.</p>
         <div class="sample">color/blue/500 <span class="arrow">→</span> <span class="dim">hue:</span> blue · <span class="dim">step:</span> 500</div>
       </article>
       <article class="tool">
         <h3>Color</h3>
+        <div class="demo" data-demo="color" aria-hidden="true"></div>
         <p>Generate colour scales with Adobe Leonardo and write them straight into a collection as primitive variables. Adjust individual shades before you commit.</p>
         <p class="benefit"><b>Why it helps.</b>Ramps are built against contrast targets, so accessible pairings come from the maths instead of eyeballing.</p>
         <div class="sample">blue/100 · blue/200 · … · blue/900</div>
       </article>
       <article class="tool">
         <h3>Semantics</h3>
+        <div class="demo" data-demo="semantics" aria-hidden="true"></div>
         <p>Create semantic aliases by mapping keywords from one group onto another. Point a role at a hue and every step follows.</p>
         <p class="benefit"><b>Why it helps.</b>A whole semantic layer from one mapping, with every alias pointing at the right primitive.</p>
         <div class="sample">blue <span class="arrow">→</span> brand <span class="dim">·</span> color/brand/500 <span class="arrow">=</span> color/blue/500</div>
@@ -347,24 +351,28 @@ footer { margin-top: calc(var(--u) * 8); padding-block: calc(var(--u) * 3) calc(
     <div class="list">
       <article class="tool">
         <h3>Surface</h3>
+        <div class="demo" data-demo="surface" aria-hidden="true"></div>
         <p>Combine keywords from several groups into surface tokens, then choose the background, foreground and border scale for each combination, with live colour previews.</p>
         <p class="benefit"><b>Why it helps.</b>Every role × prominence × state combination is covered, and none gets forgotten.</p>
         <div class="sample">surface/brand/high/hover <span class="arrow">→</span> bg · fg · border</div>
       </article>
       <article class="tool">
         <h3>Opacity</h3>
+        <div class="demo" data-demo="opacity" aria-hidden="true"></div>
         <p>Create opacity variants of colour variables. Each one is named after its source, so the relationship stays readable in the panel.</p>
         <p class="benefit"><b>Why it helps.</b>Overlays, scrims and tints become tokens rather than hand-typed alpha values.</p>
         <div class="sample">hue/100 <span class="arrow">→</span> hue/100@50 · hue/100@20</div>
       </article>
       <article class="tool">
         <h3>Substrate <span class="tag new">New</span></h3>
+        <div class="demo" data-demo="substrate" aria-hidden="true"></div>
         <p>Annotate components with an elevation offset from the surface beneath them, or a fixed level. Then pick the substrate a selection sits on and apply: every annotated layer inside gets its matching surface mode.</p>
         <p class="benefit"><b>Why it helps.</b>Cards in panels in sheets land on the right surface automatically, however deep they nest.</p>
         <div class="sample">on surface-2 <span class="arrow">→</span> card +1 = surface-3 <span class="dim">·</span> popover +2 = surface-5</div>
       </article>
       <article class="tool">
         <h3>Shadows</h3>
+        <div class="demo" data-demo="shadows" aria-hidden="true"></div>
         <p>Generate elevation-aware shadow styles from your colour variables. Tune layers, levels, light angle, distance, intensity and the step between elevations, then copy the CSS.</p>
         <p class="benefit"><b>Why it helps.</b>Layered shadows with a consistent light source, in Figma and in code.</p>
         <div class="sample">elevation/low … elevation/extreme <span class="dim">· 90° light from above</span></div>
@@ -379,47 +387,55 @@ footer { margin-top: calc(var(--u) * 8); padding-block: calc(var(--u) * 3) calc(
     <div class="list">
       <article class="tool">
         <h3>Variables</h3>
+        <div class="demo" data-demo="variables" aria-hidden="true"></div>
         <p>Browse every variable in the file, filtered by collection, type or name, and see what each one aliases.</p>
         <p class="benefit"><b>Why it helps.</b>A searchable view of large token sets that the native panel makes slow to scan.</p>
       </article>
       <article class="tool">
         <h3>Collections</h3>
+        <div class="demo" data-demo="collections" aria-hidden="true"></div>
         <p>View your variable collections with their modes, and export any of them as JSON for backup or migration.</p>
         <p class="benefit"><b>Why it helps.</b>A snapshot to version, diff or hand to a build pipeline.</p>
         <div class="sample">Primitives.json <span class="dim">· 3 modes · 412 variables</span></div>
       </article>
       <article class="tool">
         <h3>Find &amp; Replace</h3>
+        <div class="demo" data-demo="find-replace" aria-hidden="true"></div>
         <p>Search variables by name and rebind the selected layers to the renamed equivalents.</p>
         <p class="benefit"><b>Why it helps.</b>A naming change in the library no longer means re-picking variables layer by layer.</p>
         <div class="sample">gray/700 <span class="arrow">→</span> neutral/700</div>
       </article>
       <article class="tool">
         <h3>Variable Swap</h3>
+        <div class="demo" data-demo="variable-swap" aria-hidden="true"></div>
         <p>Swap variables and styles by name, or generate component permutations: map component properties to keyword groups and create every variant combination.</p>
         <p class="benefit"><b>Why it helps.</b>A full variant matrix built for you, rather than duplicated and recoloured by hand.</p>
         <div class="sample">variant[primary, secondary] × size[sm, md, lg] <span class="arrow">=</span> 6 variants</div>
       </article>
       <article class="tool">
         <h3>Hot Swap <span class="tag new">New</span></h3>
+        <div class="demo" data-demo="hot-swap" aria-hidden="true"></div>
         <p>Try alternative values for a group of variables in a sandbox collection. Switch its mode to preview a variant across real screens, then finalise to write the winner back.</p>
         <p class="benefit"><b>Why it helps.</b>Compare palettes in context without touching the live tokens until you've decided.</p>
         <div class="sample">mode: current <span class="dim">|</span> option-a <span class="dim">|</span> option-b <span class="arrow">→</span> finalise</div>
       </article>
       <article class="tool">
         <h3>Migrate</h3>
+        <div class="demo" data-demo="migrate" aria-hidden="true"></div>
         <p>Rebind nodes from one collection's variables to the same-named variables in another.</p>
         <p class="benefit"><b>Why it helps.</b>Move a file onto a new library or a restructured collection in one pass.</p>
         <div class="sample">Legacy/brand/500 <span class="arrow">→</span> Core/brand/500</div>
       </article>
       <article class="tool">
         <h3>Sync from JSON</h3>
+        <div class="demo" data-demo="sync-json" aria-hidden="true"></div>
         <p>Bring a collection back in from a modified copy of the file. Permutator updates changed values, deletes removed variables and creates new ones, and tells you when there's nothing to apply.</p>
         <p class="benefit"><b>Why it helps.</b>Work on tokens in a branch file or a script, then merge the result back cleanly.</p>
         <div class="sample">12 updated <span class="dim">·</span> 3 created <span class="dim">·</span> 1 deleted</div>
       </article>
       <article class="tool">
         <h3>Dealias</h3>
+        <div class="demo" data-demo="dealias" aria-hidden="true"></div>
         <p>Rebind layers from an alias directly to the variable it points to.</p>
         <p class="benefit"><b>Why it helps.</b>Flatten a hierarchy, debug a chain of aliases, or convert semantic tokens to primitives before restructuring.</p>
         <div class="sample">fill: danger <span class="arrow">→</span> fill: red-500</div>
@@ -434,28 +450,33 @@ footer { margin-top: calc(var(--u) * 8); padding-block: calc(var(--u) * 3) calc(
     <div class="list">
       <article class="tool">
         <h3>Inspect <span class="tag">Read-only</span></h3>
+        <div class="demo" data-demo="inspect" aria-hidden="true"></div>
         <p>See which variables a selection uses, including every nested layer in deep mode. Or audit the whole document: usage counts per variable, unused variables, and a filter for the ones that are safe to remove.</p>
         <p class="benefit"><b>Why it helps.</b>"Safe to remove" means no canvas usage and nothing aliasing it, so clean-ups don't break anything.</p>
       </article>
       <article class="tool">
         <h3>Orphan Scan <span class="tag new">New</span> <span class="tag">Read-only</span></h3>
+        <div class="demo" data-demo="orphan-scan" aria-hidden="true"></div>
         <p>Find layers and styles that still depend on deleted, deprecated or <code>[OLD]</code> variable collections, grouped by page and container.</p>
         <p class="benefit"><b>Why it helps.</b>The last stragglers after a migration, found before they ship.</p>
         <div class="sample">[OLD] Brand 2023 <span class="arrow">→</span> 18 layers on 4 pages</div>
       </article>
       <article class="tool">
         <h3>Deprecation Audit <span class="tag new">New</span> <span class="tag">Read-only</span></h3>
+        <div class="demo" data-demo="deprecation-audit" aria-hidden="true"></div>
         <p>Find deprecated components and everywhere they are used. Define matching rules, skip pages or containers, and keep a saved report. Nothing is replaced, detached, unlocked, renamed or deleted.</p>
         <p class="benefit"><b>Why it helps.</b>A clear list to hand to the teams who own each screen.</p>
       </article>
       <article class="tool">
         <h3>Alias Matrix</h3>
+        <div class="demo" data-demo="alias-matrix" aria-hidden="true"></div>
         <p>Create alias variables where each colour keyword becomes a mode and each ramp keyword becomes a variable, aliasing <code>prefix/&lt;colour&gt;/&lt;ramp&gt;</code>. A preview grid flags any source variable that's missing.</p>
         <p class="benefit"><b>Why it helps.</b>One set of accent tokens that can be any hue, switched by mode.</p>
         <div class="sample">accent/500 <span class="dim">modes:</span> blue · green · red</div>
       </article>
       <article class="tool">
         <h3>Deprecate &amp; Replace</h3>
+        <div class="demo" data-demo="deprecate-replace" aria-hidden="true"></div>
         <p>Scan a selected node for every variable and style it uses, including ones from team libraries, then choose replacements from compatible local ones. Ban an item to flag it as deprecated in every file you open.</p>
         <p class="benefit"><b>Why it helps.</b>Retire an old token and see it flagged wherever it turns up next.</p>
       </article>
@@ -547,5 +568,6 @@ footer { margin-top: calc(var(--u) * 8); padding-block: calc(var(--u) * 3) calc(
   });
 })();
 </script>
+<script src="demos.js" defer></script>
 </body>
 </html>
