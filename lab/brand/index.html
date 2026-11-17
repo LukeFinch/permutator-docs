@@ -75,7 +75,8 @@ const SCHEMA = [
     { key: 'cols', type: 'range', min: 2, max: 14, step: 1 },
     { key: 'rows', type: 'range', min: 1, max: 8, step: 1 },
     { key: 'gap', type: 'range', min: 0, max: 60, step: 1 },
-    { key: 'stroke', label: 'pen width', type: 'range', min: 0.75, max: 9, step: 0.25 },
+    { key: 'stroke', label: 'pen width', type: 'range', min: 0.5, max: 9, step: 0.25 },
+    { key: 'frame', label: 'box each cell', type: 'check' },
   ]},
   { legend: 'Cubes', when: 'cubes', rows: [
     { key: 'minEdges', label: 'fewest edges', type: 'range', min: 1, max: 12, step: 1 },
@@ -92,6 +93,13 @@ const SCHEMA = [
     { key: 'countMin', label: 'lines in row 1', type: 'range', min: 1, max: 12, step: 1 },
     { key: 'countStep', label: 'lines added per row', type: 'range', min: 0, max: 6, step: 1 },
   ]},
+  { legend: 'Lines', when: 'lines', rows: [
+    { key: 'linesMin', label: 'lines in column 1', type: 'range', min: 1, max: 60, step: 1 },
+    { key: 'linesStep', label: 'lines added per column', type: 'range', min: 0, max: 30, step: 1 },
+    { key: 'lenMin', label: 'shortest (share of cell)', type: 'range', min: 0.05, max: 1.2, step: 0.05 },
+    { key: 'lenMax', label: 'longest (share of cell)', type: 'range', min: 0.05, max: 1.2, step: 0.05 },
+    { key: 'directions', label: 'directions (0 = any)', type: 'range', min: 0, max: 8, step: 1 },
+  ]},
   { legend: 'Type', when: 'type', rows: [
     { key: 'text', label: 'glyphs', type: 'text' },
     { key: 'fontSize', label: 'size', type: 'range', min: 20, max: 96, step: 1 },
@@ -106,7 +114,7 @@ const SCHEMA = [
     { key: 'disorderAmount', label: 'amount', type: 'range', min: 0.05, max: 1, step: 0.05 },
   ]},
   { legend: 'Signal colour', rows: [
-    { key: 'signalRule', label: 'which cells', type: 'select', options: ['diagonal', 'row', 'column', 'scatter', 'none'] },
+    { key: 'signalRule', label: 'which cells', type: 'select', options: ['none', 'diagonal', 'row', 'column', 'scatter'] },
     { key: 'signalIndex', label: 'offset', type: 'range', min: 0, max: 13, step: 1 },
     { key: 'signalCount', label: 'scatter count', type: 'range', min: 1, max: 20, step: 1 },
     { key: 'signalHue', label: 'hue', type: 'range', min: 0, max: 360, step: 1 },
@@ -155,7 +163,7 @@ function buildPanel() {
     panel.appendChild(fs);
     fieldsets.push({ fs, when: group.when });
   });
-  ['cubes', 'arcs', 'bars', 'type'].forEach(m => {
+  ['cubes', 'arcs', 'bars', 'lines', 'type'].forEach(m => {
     const b = document.createElement('button');
     b.type = 'button'; b.textContent = m; b.dataset.mode = m;
     b.addEventListener('click', () => { config = { ...config, mode: m }; update(); });

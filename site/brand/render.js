@@ -10,6 +10,7 @@ export const DEFAULTS = {
   rows: 3,
   gap: 18,
   stroke: 3,
+  frame: false,
   // cubes
   minEdges: 3,
   maxEdges: 9,
@@ -22,6 +23,12 @@ export const DEFAULTS = {
   angleMax: 157.5,
   countMin: 1,
   countStep: 2,
+  // lines (after LeWitt's wall-drawing diagrams)
+  linesMin: 6,
+  linesStep: 6,
+  lenMin: 0.25,
+  lenMax: 0.6,
+  directions: 0, // 0 = any angle; 2, 4, 8 = snapped to that many directions
   // type
   text: 'Pm',
   wdthMin: 62,
@@ -160,6 +167,26 @@ function drawBars(c, r, col, i, rng, ctx) {
   };
 }
 
+function drawLines(c, r, col, i, rng, ctx) {
+  const count = c.linesMin + col * c.linesStep;
+  const len = CELL * lerp(c.lenMin, c.lenMax, c.rows > 1 ? r / (c.rows - 1) : 0);
+  // A separate stream per cell keeps the main stream's per-cell disorder rolls in step across modes.
+  const local = mulberry32(((c.seed >>> 0) ^ Math.imul(i + 1, 0x9e3779b1)) >>> 0);
+  let d = '';
+  for (let k = 0; k < count; k++) {
+    const x = local() * CELL, y = local() * CELL;
+    let a = local() * Math.PI;
+    if (c.directions > 0) a = Math.floor(a / (Math.PI / c.directions)) * (Math.PI / c.directions);
+    const dx = Math.cos(a) * len / 2, dy = Math.sin(a) * len / 2;
+    d += `M${fmt(x - dx)} ${fmt(y - dy)}L${fmt(x + dx)} ${fmt(y + dy)}`;
+  }
+  const clip = `pmclip${ctx.uid}-${i}`;
+  return {
+    defs: `<clipPath id="${clip}"><rect width="${CELL}" height="${CELL}"/></clipPath>`,
+    body: `<g clip-path="url(#${clip})"><path d="${d}"/></g>`,
+  };
+}
+
 function drawType(c, r, col) {
   const tx = c.cols > 1 ? col / (c.cols - 1) : 0;
   const ty = c.rows > 1 ? r / (c.rows - 1) : 0;
@@ -188,6 +215,7 @@ export function caption(c) {
     case 'cubes': return `Incomplete cubes of ${c.minEdges}–${c.maxEdges} edges${c.connected ? ', always connected' : ''}, stepped every ${c.stride}th form. ${grid}${dis}`;
     case 'arcs': return `Quarter arcs. Columns vary the corners, rows add a ring, up to ${c.arcMax}. ${grid}${dis}`;
     case 'bars': return `Parallel lines. Columns turn ${fmt(c.angleMin)}–${fmt(c.angleMax)}°, rows add ${c.countStep} lines from ${c.countMin}. ${grid}${dis}`;
+    case 'lines': return `Straight lines placed at random. Columns add ${c.linesStep} lines from ${c.linesMin}, rows lengthen them ${Math.round(c.lenMin * 100)}–${Math.round(c.lenMax * 100)}% of the cell${c.directions ? `, in ${c.directions} directions` : ', at any angle'}. ${grid}${dis}`;
     case 'type': return `One glyph pair, every cut. Columns widen ${c.wdthMin}–${c.wdthMax}, rows weigh ${c.wghtMin}–${c.wghtMax}. ${grid}${dis}`;
     default: return grid;
   }
@@ -209,7 +237,7 @@ export function render(input, opts = {}) {
     let guard = 0;
     while (scatter.size < Math.min(c.signalCount, total) && guard++ < 1000) scatter.add(Math.floor(rng() * total));
   }
-  const draw = { cubes: drawCube, arcs: drawArcs, bars: drawBars, type: drawType }[c.mode] || drawCube;
+  const draw = { cubes: drawCube, arcs: drawArcs, bars: drawBars, lines: drawLines, type: drawType }[c.mode] || drawCube;
   const step = CELL + c.gap;
   const W = c.cols * CELL + (c.cols - 1) * c.gap;
   const H = c.rows * CELL + (c.rows - 1) * c.gap;
@@ -235,7 +263,9 @@ export function render(input, opts = {}) {
       const attrs = cell.isText
         ? `style="color:${color}"`
         : `stroke="${color}" class="pm-stroke" style="--i:${order}"`;
-      cells += `<g transform="${tf}" ${attrs}>${cell.body.replace(/<path /g, '<path pathLength="1" ')}</g>`;
+      // Optional frame: each cell boxed like the drawing panel on a LeWitt diagram sheet.
+      const frame = c.frame ? `<rect class="pm-frame" width="${CELL}" height="${CELL}" stroke="var(--pm-ink, ${c.ink})"/>` : '';
+      cells += `<g transform="${tf}" ${attrs}>${frame}${cell.body.replace(/<path /g, '<path pathLength="1" ')}</g>`;
       order++;
     }
   }

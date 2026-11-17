@@ -5,6 +5,7 @@
   "scripts": {
     "serve": "python3 -m http.server 4321 --directory site",
     "lab": "node lab/server.mjs",
+    "brand": "node scripts/build-brand.mjs",
     "og": "node scripts/build-og.mjs"
   },
   "devDependencies": {

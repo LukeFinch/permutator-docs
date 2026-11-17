@@ -1,30 +1,36 @@
-// Renders site/og.png (1200×630 social card). Run: node scripts/build-og.mjs
+// Renders site/og.png (1200×630 social card) from the saved brand config, laid out as a diagram sheet. Run: npm run og
 import { chromium } from 'playwright';
 import { fileURLToPath } from 'node:url';
-import path from 'node:path';
 import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { render } from '../site/brand/render.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const font = readFileSync(path.join(root, 'site/fonts/bricolage-grotesque-latin.woff2')).toString('base64');
+const font = f => readFileSync(path.join(root, 'site/fonts', f)).toString('base64');
+const config = JSON.parse(readFileSync(path.join(root, 'site/brand/config.json'), 'utf8'));
+const art = render({ ...config, cols: 6, rows: 1 }, { uid: 'og' }).svg;
 
-const tokens = ['brand', 'neutral', 'danger'].flatMap(r => ['bg', 'fg', 'border'].map(e => `surface/${r}/${e}`));
+// Same thresholded ink palette the site uses, so Coral Pixels renders as crisp ink pixels without its colour fringe.
+const alphas = [0x26, 0x3d, 0x4f, 0x24, 0x1c, 0xf0, 0xf0, 0xfc, 0x26, 0xf5, 0x4a, 0x99, 0xcf, 0xf0, 0x4d, 0x1f, 0x80, 0x59, 0x9e, 0x4f, 0x42, 0x61, 0x69, 0x99, 0xc4, 0xa6, 0x75, 0x8c, 0xa6, 0x9c, 0xa1, 0xff];
+const palette = alphas.map((a, i) => `${i} rgba(17, 17, 17, ${a / 255 >= 0.5 ? 1 : 0})`).join(', ');
 
 const html = `<!doctype html><html><head><style>
-@font-face{font-family:B;src:url("data:font/woff2;base64,${font}") format("woff2");font-weight:700 800}
-*{box-sizing:border-box}body{margin:0;width:1200px;height:630px;background:oklch(0.975 0.006 255);color:oklch(0.24 0.03 260);font-family:-apple-system,system-ui,sans-serif;display:grid;grid-template-columns:1.05fr 1fr;gap:56px;padding:72px 80px;align-items:center}
-.brand{display:flex;gap:12px;align-items:center;font:800 30px B}
-h1{font:800 76px/0.98 B;letter-spacing:-0.03em;margin:28px 0 0}em{font-style:normal;color:oklch(0.53 0.19 262)}
-p{font-size:25px;color:oklch(0.47 0.025 260);margin:26px 0 0;line-height:1.4}
-.card{background:#fff;border:1px solid oklch(0.89 0.012 255);border-radius:20px;padding:30px;box-shadow:0 24px 60px -24px oklch(0.3 0.05 260/.3)}
-.f{font:500 22px ui-monospace,Menlo,monospace;color:oklch(0.47 0.025 260)}.f b{font:800 44px B;color:oklch(0.53 0.19 262)}
-ul{list-style:none;margin:18px 0 0;padding:16px 20px;background:oklch(0.975 0.006 255);border-radius:12px;font:19px/1.75 ui-monospace,Menlo,monospace;columns:1}
-li span{color:oklch(0.6 0.02 260)}
-</style></head><body>
-<div><div class="brand"><svg width="34" height="34" viewBox="0 0 24 24"><g fill="oklch(0.53 0.19 262)"><rect x="2" y="2" width="9" height="9" rx="2.5"/><rect x="13" y="2" width="9" height="9" rx="2.5" opacity=".45"/><rect x="2" y="13" width="9" height="9" rx="2.5" opacity=".45"/><rect x="13" y="13" width="9" height="9" rx="2.5" opacity=".2"/></g></svg>Permutator</div>
-<h1>Your token system, <em>multiplied</em> out for you.</h1>
-<p>20 Figma tools to generate, rewire and audit variables.</p></div>
-<div class="card"><div class="f">3 × 3 = <b>9</b> variables</div><ul>${tokens.map(t => `<li><span>${t.split('/').slice(0, 1)}/</span>${t.split('/').slice(1).join('<span>/</span>')}</li>`).join('')}</ul></div>
-</body></html>`;
+@font-face{font-family:"Coral Pixels";src:url("data:font/woff2;base64,${font('coral-pixels-latin.woff2')}") format("woff2")}
+@font-face{font-family:"Source Serif 4";src:url("data:font/woff2;base64,${font('source-serif-4-latin-var.woff2')}") format("woff2");font-weight:200 900}
+@font-palette-values --ink{font-family:"Coral Pixels";override-colors:${palette}}
+*{box-sizing:border-box}
+body{margin:0;width:1200px;height:630px;background:${config.paper};color:${config.ink};padding:36px;--pm-ink:${config.ink}}
+.sheet{height:100%;border:1.5px solid ${config.ink};display:grid;grid-template-rows:auto 1fr auto}
+.head{border-bottom:1.5px solid ${config.ink};padding:22px;text-align:center;font:40px/1 "Coral Pixels";font-palette:--ink;letter-spacing:.55em;text-indent:.55em;text-transform:uppercase}
+.body{padding:40px 64px;display:grid;align-content:center;gap:34px}
+h1{margin:0;font:54px/1.05 "Coral Pixels";font-palette:--ink;font-weight:400}
+.body svg{width:100%;height:auto;display:block}
+.foot{border-top:1.5px solid ${config.ink};padding:20px 64px;font:400 24px/1.3 "Source Serif 4"}
+</style></head><body><div class="sheet">
+<div class="head">Permutator</div>
+<div class="body"><h1>Your token system, multiplied out for you.</h1>${art}</div>
+<div class="foot">A Figma plugin for design-system teams: 20 tools to generate, rewire and audit variables.</div>
+</div></body></html>`;
 
 // Uses installed Google Chrome if Playwright's own browser isn't downloaded.
 const browser = await chromium.launch().catch(() => chromium.launch({ channel: 'chrome' }));

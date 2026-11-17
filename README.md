@@ -22,7 +22,11 @@ npm run lab     # brand lab at http://localhost:4322/lab/brand/
 ```
 
 ```bash
+npm run brand   # bake site/brand/config.json into site/index.html as static SVG
+```
+
+```bash
 npm install && npm run og   # re-render site/og.png (needs Playwright or Google Chrome)
 ```
 
-In the lab, click the canvas for a new variation, adjust the knobs, and press Save. Saving writes the config to `lab/brand/saved/` and to `site/brand/config.json`, the file the site reads.
+In the lab, click the canvas for a new variation, adjust the knobs, and press Save. Saving writes the config to `lab/brand/saved/` and to `site/brand/config.json`. Then run `npm run brand` and `npm run og` to put it on the page and the social card.

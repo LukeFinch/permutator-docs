@@ -5,15 +5,6 @@
     "ignoreValues": [
       {
         "rule": "design-system-font",
-        "value": "bricolage grotesque",
-        "files": [
-          "site/index.html"
-        ],
-        "createdAt": "2026-11-17T12:03:16.769Z",
-        "reason": "Claude: marketing site display face; DESIGN.md governs the plugin UI, not site/"
-      },
-      {
-        "rule": "design-system-font",
         "value": "sf mono",
         "files": [
           "site/index.html"
