@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bitmap serif specimens</title>
+<style>
+@font-face{font-family:"Coral Pixels";src:url("/site/fonts/coral-pixels-latin.woff2") format("woff2")}
+@font-face{font-family:"Source Serif 4";src:url("/site/fonts/source-serif-4-latin-var.woff2") format("woff2");font-weight:200 900}
+@font-face{font-family:"IBM Plex Mono";src:url("/site/fonts/ibm-plex-mono-400-latin.woff2") format("woff2")}
+:root{--paper:#fcfcfa;--ink:#111;--u:8px}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 17px/1.5 "Source Serif 4",serif;padding:48px 16px}
+main{max-width:1040px;margin:0 auto;display:grid;gap:40px}
+.intro{font:400 13px/1.5 "IBM Plex Mono",monospace}
+.sheet{border:1px solid var(--ink)}
+.head{border-bottom:1px solid var(--ink);padding:28px 24px;text-align:center;position:relative;font-size:2rem;line-height:1;letter-spacing:.55em;text-indent:.55em;text-transform:uppercase}
+.head .no{position:absolute;left:24px;top:50%;transform:translateY(-50%);font:400 .72rem/1 "IBM Plex Mono",monospace;letter-spacing:.06em;text-indent:0;text-transform:none}
+.body{padding:40px 48px;display:grid;gap:20px}
+h1{margin:0;font-weight:400;font-size:clamp(2.4rem,6vw,4.4rem);line-height:1.02;text-wrap:balance}
+.row{display:flex;gap:28px;align-items:baseline;flex-wrap:wrap}
+.mark{font-size:1.6rem;letter-spacing:.04em}
+.nav{font-size:1.25rem}
+.lede{font-family:"Source Serif 4",serif;max-width:56ch;margin:0}
+.foot{border-top:1px solid var(--ink);padding:14px 24px;font:400 12px/1.4 "IBM Plex Mono",monospace;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.coral{font-family:"Coral Pixels";font-palette:--ink}
+@media (max-width:600px){.body{padding:28px 20px}.head{font-size:1.3rem}}
+</style>
+<script>
+// Load each candidate from Fontsource on jsDelivr (all OFL-1.1).
+const fs = (fam, pkg, styles) => styles.map(([w, s]) =>
+  `@font-face{font-family:"${fam}";src:url("https://cdn.jsdelivr.net/npm/@fontsource/${pkg}@5.3.0/files/${pkg}-latin-${w}-${s}.woff2") format("woff2");font-weight:${w};font-style:${s}}`).join('');
+const all = [['400','normal'],['400','italic'],['700','normal']];
+// Coral Pixels' colour palette thresholded to solid ink, same as the site.
+const a=[0x26,0x3d,0x4f,0x24,0x1c,0xf0,0xf0,0xfc,0x26,0xf5,0x4a,0x99,0xcf,0xf0,0x4d,0x1f,0x80,0x59,0x9e,0x4f,0x42,0x61,0x69,0x99,0xc4,0xa6,0x75,0x8c,0xa6,0x9c,0xa1,0xff];
+document.write('<style>' +
+  ['10','20','35','50','70'].map(g => fs('Redaction '+g, 'redaction-'+g, all)).join('') +
+  fs('Jacquard 24','jacquard-24',[['400','normal']]) + fs('Jacquard 12','jacquard-12',[['400','normal']]) +
+  `@font-palette-values --ink{font-family:"Coral Pixels";override-colors:${a.map((x,i)=>`${i} rgba(17,17,17,${x/255>=.5?1:0})`).join(',')}}` +
+  '</style>');
+</script>
+</head><body><main>
+<p class="intro">Bitmap serif candidates, all free under the SIL Open Font License, set in the site's own sheet. Body copy stays Source Serif 4. Current font first.</p>
+<div id="out"></div>
+</main>
+<script>
+const cands = [
+  ['Coral Pixels (current)', "'Coral Pixels'", 'coral', 'Current display font. No italic or bold.'],
+  ['Redaction 10', "'Redaction 10'", '', 'Lightest pixel grade. Reads as a serif with bitmap wear. Has italic and bold.'],
+  ['Redaction 20', "'Redaction 20'", '', 'Stepped curves are clearly visible at display size.'],
+  ['Redaction 35', "'Redaction 35'", '', 'Fully pixelated, still very legible.'],
+  ['Redaction 50', "'Redaction 50'", '', 'Chunky pixels, closest to a true low-res bitmap.'],
+  ['Redaction 70', "'Redaction 70'", '', 'Heavily degraded. Display only.'],
+  ['Jacquard 24', "'Jacquard 24'", '', 'Pixel revival of a Victorian needlepoint alphabet. Blackletter-ish. Regular only.'],
+  ['Jacquard 12', "'Jacquard 12'", '', 'Coarser 12-pixel grid version.'],
+];
+document.getElementById('out').outerHTML = cands.map(([name, fam, cls, note], i) => `
+<section class="sheet" style="font-family:${fam}">
+  <div class="head ${cls}"><span class="no">${i+1} / ${cands.length}</span>Generate</div>
+  <div class="body">
+    <div class="row"><span class="mark ${cls}">Permutator</span><span class="nav ${cls}"><i>Tools</i> &nbsp; <i>Sequence</i> &nbsp; <i>Status</i></span><span class="nav ${cls}"><b>Coming soon</b></span></div>
+    <h1 class="${cls}">Your token system, multiplied out for you.</h1>
+    <p class="lede">Generate, rewire and audit Figma variables. Twenty tools for design-system teams, from permutation to dealiasing.</p>
+  </div>
+  <div class="foot"><span>${name}</span><span>${note}</span></div>
+</section>`).join('');
+</script>
+</body></html>
